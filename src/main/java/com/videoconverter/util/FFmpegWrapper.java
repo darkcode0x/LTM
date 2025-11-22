@@ -6,17 +6,12 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * FFmpegWrapper - Simplified wrapper for FFmpeg video conversion
- */
 public class FFmpegWrapper {
     private static final String FFMPEG_CMD = "ffmpeg";
     private static final Pattern DURATION_PATTERN = Pattern.compile("Duration: (\\d{2}):(\\d{2}):(\\d{2})");
     private static final Pattern TIME_PATTERN = Pattern.compile("time=(\\d{2}):(\\d{2}):(\\d{2})");
 
-    /**
-     * Convert video to specified format with progress callback
-     */
+
     public boolean convertVideo(String inputPath, String outputPath, String format, Consumer<Integer> progressCallback) {
         try {
             // Build FFmpeg command
@@ -71,9 +66,6 @@ public class FFmpegWrapper {
         }
     }
 
-    /**
-     * Check if FFmpeg is available
-     */
     public static boolean isFFmpegAvailable() {
         try {
             ProcessBuilder pb = new ProcessBuilder(FFMPEG_CMD, "-version");

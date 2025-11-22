@@ -4,14 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * DBConnection Utility Class
- * Provides database connection management for MySQL
- */
+
 public class DBConnection {
     
-    // Database connection parameters
-    // NOTE: Change these values according to your MySQL configuration
+
     private static final String URL = "jdbc:mysql://localhost:3306/video_converter";
     private static final String USER = "root";
     private static final String PASSWORD = "";
@@ -39,12 +35,7 @@ public class DBConnection {
         }
     }
     
-    /**
-     * Get a new database connection
-     * 
-     * @return Connection object to MySQL database
-     * @throws SQLException if connection fails
-     */
+
     public static Connection getConnection() throws SQLException {
         try {
             Connection conn = DriverManager.getConnection(
@@ -63,11 +54,7 @@ public class DBConnection {
         }
     }
     
-    /**
-     * Test database connection
-     * 
-     * @return true if connection is successful, false otherwise
-     */
+
     public static boolean testConnection() {
         try (Connection conn = getConnection()) {
             return conn != null && !conn.isClosed();
@@ -76,12 +63,7 @@ public class DBConnection {
             return false;
         }
     }
-    
-    /**
-     * Close database connection safely
-     * 
-     * @param conn Connection to close
-     */
+
     public static void closeConnection(Connection conn) {
         if (conn != null) {
             try {
@@ -93,12 +75,7 @@ public class DBConnection {
             }
         }
     }
-    
-    /**
-     * Close multiple database resources safely
-     * 
-     * @param resources AutoCloseable resources (Connection, Statement, ResultSet, etc.)
-     */
+
     public static void closeResources(AutoCloseable... resources) {
         for (AutoCloseable resource : resources) {
             if (resource != null) {
@@ -111,21 +88,11 @@ public class DBConnection {
             }
         }
     }
-    
-    /**
-     * Get database URL (for configuration purposes)
-     * 
-     * @return database URL
-     */
+
     public static String getDatabaseURL() {
         return URL;
     }
-    
-    /**
-     * Get database user (for configuration purposes)
-     * 
-     * @return database user
-     */
+
     public static String getDatabaseUser() {
         return USER;
     }

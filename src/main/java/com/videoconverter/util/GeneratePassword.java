@@ -1,15 +1,5 @@
 package com.videoconverter.util;
 
-/**
- * GeneratePassword - Utility to generate BCrypt password hashes
- *
- * Usage:
- * - Run this class with password as argument
- * - Or modify the passwords array and run
- *
- * Example:
- * java com.videoconverter.util.GeneratePassword mypassword
- */
 public class GeneratePassword {
 
     public static void main(String[] args) {
@@ -56,7 +46,6 @@ public class GeneratePassword {
             System.out.println("BCrypt hash: " + hash);
             System.out.println();
 
-            // Verify the hash works
             boolean verified = PasswordUtil.checkPassword(password, hash);
             if (verified) {
                 System.out.println("✓ Verification: SUCCESS");

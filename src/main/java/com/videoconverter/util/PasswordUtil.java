@@ -2,24 +2,11 @@ package com.videoconverter.util;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-/**
- * PasswordUtil Utility Class
- * Provides password hashing and verification using BCrypt
- */
+
 public class PasswordUtil {
 
-    // BCrypt default work factor (log rounds)
-    // Higher value = more secure but slower
-    // Recommended: 10-12 for production
     private static final int WORK_FACTOR = 10;
 
-    /**
-     * Hash a plain text password using BCrypt
-     *
-     * @param plainPassword The plain text password to hash
-     * @return The hashed password (60 characters)
-     * @throws IllegalArgumentException if plainPassword is null or empty
-     */
     public static String hashPassword(String plainPassword) {
         if (plainPassword == null || plainPassword.trim().isEmpty()) {
             throw new IllegalArgumentException("Password cannot be null or empty");
@@ -36,14 +23,6 @@ public class PasswordUtil {
         }
     }
 
-    /**
-     * Verify a plain text password against a hashed password
-     *
-     * @param plainPassword The plain text password to verify
-     * @param hashedPassword The hashed password to check against
-     * @return true if password matches, false otherwise
-     * @throws IllegalArgumentException if any parameter is null or empty
-     */
     public static boolean checkPassword(String plainPassword, String hashedPassword) {
         if (plainPassword == null || plainPassword.trim().isEmpty()) {
             throw new IllegalArgumentException("Plain password cannot be null or empty");
@@ -70,13 +49,6 @@ public class PasswordUtil {
         }
     }
 
-    /**
-     * Check if a password hash needs to be rehashed
-     * (useful when updating work factor)
-     *
-     * @param hashedPassword The hashed password to check
-     * @return true if password needs rehashing, false otherwise
-     */
     public static boolean needsRehash(String hashedPassword) {
         if (hashedPassword == null || hashedPassword.trim().isEmpty()) {
             return true;
@@ -96,13 +68,6 @@ public class PasswordUtil {
         }
     }
 
-    /**
-     * Validate password strength
-     * Returns true if password meets minimum requirements
-     *
-     * @param password The password to validate
-     * @return true if password is strong enough, false otherwise
-     */
     public static boolean isStrongPassword(String password) {
         if (password == null || password.length() < 8) {
             return false;
