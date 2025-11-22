@@ -14,7 +14,7 @@ public class DBConnection {
     // NOTE: Change these values according to your MySQL configuration
     private static final String URL = "jdbc:mysql://localhost:3306/video_converter";
     private static final String USER = "root";
-    private static final String PASSWORD = "@Darkcode_0x";
+    private static final String PASSWORD = "";
     
     // MySQL driver class name
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
