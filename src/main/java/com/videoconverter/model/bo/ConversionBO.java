@@ -31,8 +31,8 @@ public class ConversionBO {
     private final BlockingQueue<ConversionJob> jobQueue;
     private final ExecutorService executorService;
 
-    private static final int WORKER_COUNT = 2;
-    private static final int MAX_QUEUE_SIZE = 100;
+    private static final int WORKER_COUNT = 4; // 16 cores → 8 workers (50% cho web + DB)
+    private static final int MAX_QUEUE_SIZE = 80; // Giảm xuống để tránh quá tải
     private volatile boolean isRunning = false;
 
     private ConversionBO() {
