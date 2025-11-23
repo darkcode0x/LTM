@@ -9,6 +9,12 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
+/**
+ * Filter kiểm tra authentication và authorization
+ * - Cho phép access public resources (login, register, static files)
+ * - Yêu cầu login cho các trang khác
+ * - Kiểm tra quyền admin cho /admin/*
+ */
 @WebFilter("/*")
 public class AuthenticationFilter implements Filter {
 
@@ -23,39 +29,44 @@ public class AuthenticationFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        String uri = req.getRequestURI();
-        String contextPath = req.getContextPath();
-        String path = uri.substring(contextPath.length());
+        // Lấy path từ URI
+        String path = req.getRequestURI().substring(req.getContextPath().length());
 
-        // Check if path is public
+        // Cho phép public resources
         if (isPublicResource(path)) {
             chain.doFilter(request, response);
             return;
         }
 
-        // Check authentication
+        // Kiểm tra đã login chưa
         HttpSession session = req.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         if (user == null) {
-            res.sendRedirect(contextPath + "/login");
+            res.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
-        // Check admin access
+        // Kiểm tra quyền admin
         if (path.startsWith("/admin") && !user.isAdmin()) {
             res.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
+        // Cho phép tiếp tục
         chain.doFilter(request, response);
     }
 
+    /**
+     * Kiểm tra có phải public resource không
+     */
     private boolean isPublicResource(String path) {
+        // Root page, login page, register page
         if (path.equals("/") || path.equals("/login.jsp") || path.equals("/register.jsp")) {
             return true;
         }
 
+        // Static resources và public endpoints
         for (String publicUrl : PUBLIC_URLS) {
             if (path.startsWith(publicUrl)) {
                 return true;

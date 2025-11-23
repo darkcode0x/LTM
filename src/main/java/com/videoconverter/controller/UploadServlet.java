@@ -14,12 +14,12 @@ import jakarta.servlet.http.Part;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 
 @WebServlet("/upload")
 @MultipartConfig(
-    maxFileSize = 524288000,      // 500 MB
-    maxRequestSize = 524288000
+    maxFileSize = 5368709120L,      // 500 gb
+    maxRequestSize = 10737418240L, //10gb
+    fileSizeThreshold = 52428800
 )
 public class UploadServlet extends HttpServlet {
     private ConversionBO conversionBO;
@@ -40,47 +40,55 @@ public class UploadServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Check authentication
         HttpSession session = request.getSession(false);
-        User user = (User) session.getAttribute("user");
+        if (session == null) {
+            response.sendRedirect("login");
+            return;
+        }
 
+        User user = (User) session.getAttribute("user");
         if (user == null) {
             response.sendRedirect("login");
             return;
         }
 
         try {
+            // Get form data
             Part filePart = request.getPart("videoFile");
             String outputFormat = request.getParameter("outputFormat");
 
+            // Validate file
             if (filePart == null || filePart.getSize() == 0) {
-                request.setAttribute("error", "Please select a video file");
-                request.getRequestDispatcher("upload.jsp").forward(request, response);
+                showError(request, response, "Please select a video file");
                 return;
             }
 
             // Validate output format
-            if (outputFormat == null || !isValidFormat(outputFormat)) {
-                request.setAttribute("error", "Invalid output format");
-                request.getRequestDispatcher("upload.jsp").forward(request, response);
+            if (!isValidFormat(outputFormat)) {
+                showError(request, response, "Invalid output format");
                 return;
             }
 
-            // Get filename
+            // Get and validate filename
             String filename = getFileName(filePart);
             if (filename == null || filename.isEmpty()) {
-                request.setAttribute("error", "Invalid file");
-                request.getRequestDispatcher("upload.jsp").forward(request, response);
+                showError(request, response, "Invalid file");
                 return;
             }
 
-            // Create upload directory
+            // Prepare upload directory
             String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
+                boolean created = uploadDir.mkdirs();
+                if (!created) {
+                    showError(request, response, "Failed to create upload directory");
+                    return;
+                }
             }
 
-            // Save file
+            // Save file with unique name
             String uniqueFilename = System.currentTimeMillis() + "_" + filename;
             String filePath = uploadPath + File.separator + uniqueFilename;
             filePart.write(filePath);
@@ -97,23 +105,34 @@ public class UploadServlet extends HttpServlet {
             if (job != null) {
                 response.sendRedirect("status?success=true");
             } else {
-                // Delete uploaded file on failure
-                new File(filePath).delete();
-                request.setAttribute("error", "Failed to create conversion job");
-                request.getRequestDispatcher("upload.jsp").forward(request, response);
+                // Cleanup on failure
+                File uploadedFile = new File(filePath);
+                if (uploadedFile.exists()) {
+                    boolean deleted = uploadedFile.delete();
+                    if (!deleted) {
+                        System.err.println("[UploadServlet] Failed to delete file: " + filePath);
+                    }
+                }
+                showError(request, response, "Failed to create conversion job. Queue may be full.");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Upload failed: " + e.getMessage());
-            request.getRequestDispatcher("upload.jsp").forward(request, response);
+            System.err.println("[UploadServlet] Error: " + e.getMessage());
+            showError(request, response, "Upload failed: " + e.getMessage());
         }
+    }
+
+    private void showError(HttpServletRequest request, HttpServletResponse response, String message)
+            throws ServletException, IOException {
+        request.setAttribute("error", message);
+        request.getRequestDispatcher("upload.jsp").forward(request, response);
     }
 
     private String getFileName(Part part) {
         String contentDisp = part.getHeader("content-disposition");
-        String[] tokens = contentDisp.split(";");
-        for (String token : tokens) {
+        if (contentDisp == null) return null;
+
+        for (String token : contentDisp.split(";")) {
             if (token.trim().startsWith("filename")) {
                 return token.substring(token.indexOf("=") + 2, token.length() - 1);
             }
@@ -122,6 +141,8 @@ public class UploadServlet extends HttpServlet {
     }
 
     private boolean isValidFormat(String format) {
+        if (format == null) return false;
+
         for (String allowed : ALLOWED_FORMATS) {
             if (allowed.equalsIgnoreCase(format)) {
                 return true;

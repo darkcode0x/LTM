@@ -4,12 +4,7 @@ import com.videoconverter.model.bean.Video;
 import com.videoconverter.util.DBConnection;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * VideoDAO - Database access for videos table
- */
 public class VideoDAO {
 
     public boolean createVideo(Video video) {
@@ -45,58 +40,19 @@ public class VideoDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return extractVideo(rs);
+                return new Video(
+                    rs.getInt("video_id"),
+                    rs.getInt("user_id"),
+                    rs.getString("filename"),
+                    rs.getString("file_path"),
+                    rs.getLong("file_size"),
+                    rs.getTimestamp("uploaded_at")
+                );
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public List<Video> getVideosByUserId(int userId) {
-        List<Video> videos = new ArrayList<>();
-        String sql = "SELECT * FROM videos WHERE user_id = ? ORDER BY uploaded_at DESC";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                videos.add(extractVideo(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return videos;
-    }
-
-    public int getTotalVideosByUserId(int userId) {
-        String sql = "SELECT COUNT(*) FROM videos WHERE user_id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    private Video extractVideo(ResultSet rs) throws SQLException {
-        return new Video(
-            rs.getInt("video_id"),
-            rs.getInt("user_id"),
-            rs.getString("filename"),
-            rs.getString("file_path"),
-            rs.getLong("file_size"),
-            rs.getTimestamp("uploaded_at")
-        );
     }
 }
 

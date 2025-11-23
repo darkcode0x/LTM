@@ -28,15 +28,26 @@ public class DownloadServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        User user = (User) session.getAttribute("user");
 
+        if (session == null) {
+            response.sendRedirect("login");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
         if (user == null) {
             response.sendRedirect("login");
             return;
         }
 
         try {
-            int jobId = Integer.parseInt(request.getParameter("jobId"));
+            String jobIdParam = request.getParameter("jobId");
+            if (jobIdParam == null || jobIdParam.trim().isEmpty()) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing jobId");
+                return;
+            }
+
+            int jobId = Integer.parseInt(jobIdParam);
             ConversionJob job = jobDAO.getJobById(jobId);
 
             if (job == null || job.getUserId() != user.getUserId()) {
@@ -50,30 +61,46 @@ public class DownloadServlet extends HttpServlet {
             }
 
             File file = new File(job.getOutputPath());
+
+            // Security: Prevent path traversal
+            String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
+            String canonicalPath = file.getCanonicalPath();
+            if (!canonicalPath.startsWith(uploadPath)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid path");
+                return;
+            }
+
             if (!file.exists()) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found");
                 return;
             }
 
+            // Sanitize filename
+            String safeFilename = file.getName().replaceAll("[^a-zA-Z0-9._-]", "_");
+
             // Set response headers
             response.setContentType("application/octet-stream");
             response.setContentLengthLong(file.length());
             response.setHeader("Content-Disposition",
-                "attachment; filename=\"" + file.getName() + "\"");
+                "attachment; filename=\"" + safeFilename + "\"");
 
             // Stream file to client
             try (FileInputStream in = new FileInputStream(file);
                  OutputStream out = response.getOutputStream()) {
 
-                byte[] buffer = new byte[4096];
+                byte[] buffer = new byte[8192];
                 int bytesRead;
                 while ((bytesRead = in.read(buffer)) != -1) {
                     out.write(buffer, 0, bytesRead);
                 }
+                out.flush();
             }
 
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid jobId");
+        } catch (Exception e) {
+            getServletContext().log("Download error", e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }

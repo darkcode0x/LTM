@@ -10,24 +10,14 @@ public class AppContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        System.out.println("=== Video Converter Application Starting ===");
-
-        // Start conversion workers
-        ConversionBO conversionBO = ConversionBO.getInstance();
-        conversionBO.startWorkers();
-
-        System.out.println("=== Application Started Successfully ===");
+        System.out.println("[App] Starting...");
+        ConversionBO.getInstance().startWorkers();
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        System.out.println("=== Video Converter Application Stopping ===");
-
-        // Stop conversion workers
-        ConversionBO conversionBO = ConversionBO.getInstance();
-        conversionBO.stopWorkers();
-
-        System.out.println("=== Application Stopped ===");
+        System.out.println("[App] Stopping...");
+        ConversionBO.getInstance().stopWorkers();
     }
 }
 

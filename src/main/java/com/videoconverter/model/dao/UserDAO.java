@@ -16,19 +16,13 @@ public class UserDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
-            System.out.println("[UserDAO] Searching for username: " + username);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                User user = extractUser(rs);
-                System.out.println("[UserDAO] User found: " + user.getUsername() + " (ID: " + user.getUserId() + ")");
-                return user;
-            } else {
-                System.out.println("[UserDAO] User not found: " + username);
+                return extractUser(rs);
             }
         } catch (SQLException e) {
-            System.err.println("[UserDAO] Error getting user by username: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("[UserDAO] Error getting user: " + e.getMessage());
         }
         return null;
     }
@@ -39,19 +33,13 @@ public class UserDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, email);
-            System.out.println("[UserDAO] Searching for email: " + email);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                User user = extractUser(rs);
-                System.out.println("[UserDAO] User found by email: " + user.getUsername());
-                return user;
-            } else {
-                System.out.println("[UserDAO] User not found by email: " + email);
+                return extractUser(rs);
             }
         } catch (SQLException e) {
             System.err.println("[UserDAO] Error getting user by email: " + e.getMessage());
-            e.printStackTrace();
         }
         return null;
     }

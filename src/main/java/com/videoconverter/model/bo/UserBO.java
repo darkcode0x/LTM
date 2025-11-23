@@ -51,32 +51,17 @@ public class UserBO {
         return userDAO.createUser(user);
     }
 
-    /**
-     * Get total number of users (for admin)
-     */
+
     public int getTotalUsers() {
         return userDAO.getTotalUsers();
     }
 
-    /**
-     * Validate username format
-     */
     public boolean isValidUsername(String username) {
         return username != null && username.matches("^[a-zA-Z0-9_]{3,20}$");
     }
 
-    /**
-     * Validate email format
-     */
     public boolean isValidEmail(String email) {
         return email != null && email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
-    }
-
-    /**
-     * Validate password strength
-     */
-    public boolean isValidPassword(String password) {
-        return password != null && password.length() >= 6;
     }
 }
 

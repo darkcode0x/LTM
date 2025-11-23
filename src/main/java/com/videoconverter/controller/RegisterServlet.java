@@ -1,6 +1,7 @@
 package com.videoconverter.controller;
 
 import com.videoconverter.model.bo.UserBO;
+import com.videoconverter.util.PasswordUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -44,8 +45,8 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        if (!userBO.isValidPassword(password)) {
-            request.setAttribute("error", "Password must be at least 6 characters");
+        if (!PasswordUtil.isStrongPassword(password)) {
+            request.setAttribute("error", "Password must be at least 8 characters and contain 3 of: uppercase, lowercase, digit, special character");
             request.getRequestDispatcher("register.jsp").forward(request, response);
             return;
         }

@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ConversionJobDAO - Database access for conversion_jobs table
+ * ConversionJobDAO - Truy cập database cho bảng conversion_jobs
  */
 public class ConversionJobDAO {
 
+    /**
+     * Tạo job mới với status PENDING
+     */
     public boolean createJob(ConversionJob job) {
         String sql = "INSERT INTO conversion_jobs (video_id, user_id, output_format, status, progress) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
@@ -34,11 +37,14 @@ public class ConversionJobDAO {
                 return true;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[JobDAO] Create failed: " + e.getMessage());
         }
         return false;
     }
 
+    /**
+     * Update status và progress của job
+     */
     public boolean updateJobStatus(int jobId, String status, int progress) {
         String sql = "UPDATE conversion_jobs SET status = ?, progress = ? WHERE job_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -50,11 +56,14 @@ public class ConversionJobDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[JobDAO] Update status failed: " + e.getMessage());
         }
         return false;
     }
 
+    /**
+     * Mark job là COMPLETED
+     */
     public boolean completeJob(int jobId, String outputPath) {
         String sql = "UPDATE conversion_jobs SET status = 'COMPLETED', progress = 100, output_path = ?, completed_at = NOW() WHERE job_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -65,11 +74,14 @@ public class ConversionJobDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[JobDAO] Complete failed: " + e.getMessage());
         }
         return false;
     }
 
+    /**
+     * Mark job là FAILED
+     */
     public boolean failJob(int jobId, String errorMessage) {
         String sql = "UPDATE conversion_jobs SET status = 'FAILED', error_message = ?, completed_at = NOW() WHERE job_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -80,11 +92,14 @@ public class ConversionJobDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[JobDAO] Fail job failed: " + e.getMessage());
         }
         return false;
     }
 
+    /**
+     * Lấy job theo ID
+     */
     public ConversionJob getJobById(int jobId) {
         String sql = "SELECT j.*, v.filename as video_filename FROM conversion_jobs j " +
                      "INNER JOIN videos v ON j.video_id = v.video_id WHERE j.job_id = ?";
@@ -98,11 +113,14 @@ public class ConversionJobDAO {
                 return extractJob(rs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[JobDAO] Get by ID failed: " + e.getMessage());
         }
         return null;
     }
 
+    /**
+     * Lấy tất cả jobs của user
+     */
     public List<ConversionJob> getJobsByUserId(int userId) {
         List<ConversionJob> jobs = new ArrayList<>();
         String sql = "SELECT j.*, v.filename as video_filename FROM conversion_jobs j " +
@@ -118,11 +136,14 @@ public class ConversionJobDAO {
                 jobs.add(extractJob(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[JobDAO] Get by user failed: " + e.getMessage());
         }
         return jobs;
     }
 
+    /**
+     * Lấy tất cả pending jobs (dùng khi restart server)
+     */
     public List<ConversionJob> getPendingJobs() {
         List<ConversionJob> jobs = new ArrayList<>();
         String sql = "SELECT j.*, v.filename as video_filename FROM conversion_jobs j " +
@@ -136,11 +157,14 @@ public class ConversionJobDAO {
                 jobs.add(extractJob(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[JobDAO] Get pending failed: " + e.getMessage());
         }
         return jobs;
     }
 
+    /**
+     * Xóa job
+     */
     public boolean deleteJob(int jobId) {
         String sql = "DELETE FROM conversion_jobs WHERE job_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -149,11 +173,14 @@ public class ConversionJobDAO {
             stmt.setInt(1, jobId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("[JobDAO] Delete failed: " + e.getMessage());
         }
         return false;
     }
 
+    /**
+     * Thống kê conversions (dùng cho admin dashboard)
+     */
     public Map<Integer, Integer> getConversionCountByUser() {
         Map<Integer, Integer> counts = new HashMap<>();
         String sql = "SELECT user_id, COUNT(*) as count FROM conversion_jobs WHERE status = 'COMPLETED' GROUP BY user_id";
@@ -165,11 +192,14 @@ public class ConversionJobDAO {
                 counts.put(rs.getInt("user_id"), rs.getInt("count"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            // Lỗi get conversion count
         }
         return counts;
     }
 
+    /**
+     * Helper: Extract job từ ResultSet
+     */
     private ConversionJob extractJob(ResultSet rs) throws SQLException {
         ConversionJob job = new ConversionJob(
             rs.getInt("job_id"),

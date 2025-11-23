@@ -1,5 +1,8 @@
 package com.videoconverter.util;
 
+// sử dụng để tạo user/admin thủ công -> sau đó tự viết script insert vào database.
+// không dùng trong code chính.
+
 public class GeneratePassword {
 
     public static void main(String[] args) {
