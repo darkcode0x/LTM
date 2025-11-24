@@ -26,7 +26,7 @@ RUN mkdir -p /usr/local/tomcat/webapps/uploads/avatars \
 # Environment variables for DB connection (match your code expectations)
 ENV DB_HOST=db \
     DB_PORT=3306 \
-    DB_NAME=videodb \
+    DB_NAME=video_converter \
     DB_USER=videouser \
     DB_PASSWORD=videopass
 
