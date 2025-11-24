@@ -10,8 +10,8 @@ public class DBConnection {
     private static final String DB_HOST = getenv("DB_HOST", "localhost");
     private static final String DB_PORT = getenv("DB_PORT", "3306");
     private static final String DB_NAME = getenv("DB_NAME", "video_converter");
-    private static final String DB_USER = getenv("DB_USER", "videouser");
-    private static final String DB_PASSWORD = getenv("DB_PASSWORD", "videopass");
+    private static final String DB_USER = getenv("DB_USER", "root");
+    private static final String DB_PASSWORD = getenv("DB_PASSWORD", "");
 
     private static final String JDBC_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME
             + "?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=UTC";
