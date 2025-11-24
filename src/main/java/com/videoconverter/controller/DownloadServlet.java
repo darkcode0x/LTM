@@ -62,10 +62,12 @@ public class DownloadServlet extends HttpServlet {
 
             File file = new File(job.getOutputPath());
 
-            // Security: Prevent path traversal
-            String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
+            // Security: Prevent path traversal (normalize root + enforce trailing separator)
+            File uploadsRoot = new File(getServletContext().getRealPath("/uploads"));
+            String allowedRoot = uploadsRoot.getCanonicalPath() + File.separator;
             String canonicalPath = file.getCanonicalPath();
-            if (!canonicalPath.startsWith(uploadPath)) {
+            if (!canonicalPath.startsWith(allowedRoot) || !file.isFile()) {
+                getServletContext().log("Blocked download outside uploads: " + canonicalPath);
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid path");
                 return;
             }
