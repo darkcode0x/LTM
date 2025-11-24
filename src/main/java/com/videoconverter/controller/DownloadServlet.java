@@ -62,10 +62,28 @@ public class DownloadServlet extends HttpServlet {
 
             File file = new File(job.getOutputPath());
 
+            // If file doesn't exist at absolute path, try relative to webapp
+            if (!file.exists()) {
+                String storedPath = job.getOutputPath().replace("\\", "/");
+                int uploadsIndex = storedPath.indexOf("uploads");
+
+                if (uploadsIndex != -1) {
+                    String relativePath = storedPath.substring(uploadsIndex).replace("/", File.separator);
+                    String webappPath = getServletContext().getRealPath("");
+                    File relativeFile = new File(webappPath, relativePath);
+
+                    if (relativeFile.exists()) {
+                        file = relativeFile;
+                    }
+                }
+            }
+
             // Security: Prevent path traversal
             String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
             String canonicalPath = file.getCanonicalPath();
-            if (!canonicalPath.startsWith(uploadPath)) {
+            String normalizedUploadPath = new File(uploadPath).getCanonicalPath();
+
+            if (!canonicalPath.startsWith(normalizedUploadPath)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid path");
                 return;
             }
