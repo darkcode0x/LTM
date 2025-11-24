@@ -9,9 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * ConversionJobDAO - Truy cập database cho bảng conversion_jobs
- */
 public class ConversionJobDAO {
 
     /**
@@ -192,7 +189,6 @@ public class ConversionJobDAO {
                 counts.put(rs.getInt("user_id"), rs.getInt("count"));
             }
         } catch (SQLException e) {
-            // Lỗi get conversion count
         }
         return counts;
     }

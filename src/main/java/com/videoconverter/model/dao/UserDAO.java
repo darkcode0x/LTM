@@ -5,9 +5,7 @@ import com.videoconverter.util.DBConnection;
 
 import java.sql.*;
 
-/**
- * UserDAO - Database access for users table
- */
+
 public class UserDAO {
 
     public User getUserByUsername(String username) {

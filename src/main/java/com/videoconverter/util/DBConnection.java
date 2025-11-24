@@ -4,9 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Simple database connection utility
- */
 public class DBConnection {
     
     private static final String URL = "jdbc:mysql://localhost:3306/video_converter";
@@ -21,10 +18,7 @@ public class DBConnection {
             throw new RuntimeException("MySQL JDBC Driver not found", e);
         }
     }
-    
-    /**
-     * Get database connection
-     */
+
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(
             URL + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true",
