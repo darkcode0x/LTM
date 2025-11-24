@@ -7,15 +7,18 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: videodb
+      MYSQL_DATABASE: video_converter  # must match dump content
       MYSQL_USER: videouser
       MYSQL_PASSWORD: videopass
+      TZ: Asia/Ho_Chi_Minh
     command: ["--default-authentication-plugin=mysql_native_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
     volumes:
       - db_data:/var/lib/mysql
+      # Import schema + seed data on first run
+      - ./video_converter.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 30s
+      interval: 25s
       timeout: 5s
       retries: 5
 
@@ -29,20 +32,21 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 3306
-      DB_NAME: videodb
+      DB_NAME: video_converter
       DB_USER: videouser
       DB_PASSWORD: videopass
       JAVA_OPTS: "-Xms256m -Xmx512m"
+      TZ: Asia/Ho_Chi_Minh
     ports:
       - "8080:8080"
     volumes:
       - uploads:/usr/local/tomcat/webapps/uploads
-    # If you want to inspect logs easily
-    # logging:
-    #   driver: json-file
-    #   options:
-    #     max-size: "10m"
-    #     max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
 
 volumes:
   db_data:
