@@ -14,7 +14,7 @@ public class DBConnection {
     private static final String DB_PASSWORD = getenv("DB_PASSWORD", "");
 
     private static final String JDBC_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME
-            + "?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=UTC";
+            + "?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh";
 
     private static String getenv(String key, String def) {
         String v = System.getenv(key);

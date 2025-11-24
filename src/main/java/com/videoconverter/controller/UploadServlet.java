@@ -17,9 +17,9 @@ import java.io.IOException;
 
 @WebServlet("/upload")
 @MultipartConfig(
-    maxFileSize = 3221225472L,      // 3gb
-    maxRequestSize = 3221225472L,   //  3gb
-    fileSizeThreshold = 16777216  // 16mb buffer trong RAM
+    maxFileSize = 3221225472L,
+    maxRequestSize = 3221225472L,
+    fileSizeThreshold = 268435456
 )
 public class UploadServlet extends HttpServlet {
     private ConversionBO conversionBO;
@@ -54,30 +54,25 @@ public class UploadServlet extends HttpServlet {
         }
 
         try {
-            // Get form data
             Part filePart = request.getPart("videoFile");
             String outputFormat = request.getParameter("outputFormat");
 
-            // Validate file
             if (filePart == null || filePart.getSize() == 0) {
                 showError(request, response, "Please select a video file");
                 return;
             }
 
-            // Validate output format
             if (!isValidFormat(outputFormat)) {
                 showError(request, response, "Invalid output format");
                 return;
             }
 
-            // Get and validate filename
             String filename = getFileName(filePart);
             if (filename == null || filename.isEmpty()) {
                 showError(request, response, "Invalid file");
                 return;
             }
 
-            // Prepare upload directory
             String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
@@ -88,12 +83,10 @@ public class UploadServlet extends HttpServlet {
                 }
             }
 
-            // Save file with unique name
             String uniqueFilename = System.currentTimeMillis() + "_" + filename;
             String filePath = uploadPath + File.separator + uniqueFilename;
             filePart.write(filePath);
 
-            // Submit conversion job
             ConversionJob job = conversionBO.submitJob(
                 user.getUserId(),
                 filename,
@@ -105,19 +98,14 @@ public class UploadServlet extends HttpServlet {
             if (job != null) {
                 response.sendRedirect("status?success=true");
             } else {
-                // Cleanup on failure
                 File uploadedFile = new File(filePath);
                 if (uploadedFile.exists()) {
-                    boolean deleted = uploadedFile.delete();
-                    if (!deleted) {
-                        System.err.println("[UploadServlet] Failed to delete file: " + filePath);
-                    }
+                    uploadedFile.delete();
                 }
                 showError(request, response, "Failed to create conversion job. Queue may be full.");
             }
 
         } catch (Exception e) {
-            System.err.println("[UploadServlet] Error: " + e.getMessage());
             showError(request, response, "Upload failed: " + e.getMessage());
         }
     }

@@ -122,6 +122,8 @@
     </div>
 
     <script>
+        let uploadCompleted = false;
+
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -133,21 +135,15 @@
                 return;
             }
 
-            // Show overlay
             const overlay = document.getElementById('uploadingOverlay');
             overlay.style.display = 'flex';
 
-            // Show file info
             const fileSize = (file.size / (1024 * 1024)).toFixed(2);
             document.getElementById('fileInfo').textContent = `Uploading ${file.name} (${fileSize} MB)`;
 
-            // Disable form
             document.getElementById('uploadBtn').disabled = true;
 
-            // Create FormData
             const formData = new FormData(this);
-
-            // Upload with progress
             const xhr = new XMLHttpRequest();
 
             xhr.upload.addEventListener('progress', function(e) {
@@ -161,14 +157,13 @@
 
             xhr.addEventListener('load', function() {
                 if (xhr.status === 200) {
-                    // Update message
+                    uploadCompleted = true;
                     document.querySelector('.uploading-content h4').textContent = 'Upload Complete!';
-                    document.querySelector('.uploading-content p').textContent = 'Redirecting to status page...';
+                    document.querySelector('.uploading-content p').textContent = 'Redirecting...';
 
-                    // Redirect after short delay
                     setTimeout(function() {
-                        window.location.href = 'status?success=true';
-                    }, 1000);
+                        window.location.href = 'status';
+                    }, 800);
                 } else {
                     alert('Upload failed. Please try again.');
                     overlay.style.display = 'none';
@@ -186,10 +181,8 @@
             xhr.send(formData);
         });
 
-        // Prevent accidental page close
         window.addEventListener('beforeunload', function(e) {
-            const overlay = document.getElementById('uploadingOverlay');
-            if (overlay.style.display === 'flex') {
+            if (!uploadCompleted && document.getElementById('uploadingOverlay').style.display === 'flex') {
                 e.preventDefault();
                 e.returnValue = 'Upload in progress. Are you sure you want to leave?';
                 return e.returnValue;

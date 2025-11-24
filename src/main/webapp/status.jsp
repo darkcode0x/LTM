@@ -3,6 +3,7 @@
 <%@ page import="com.videoconverter.model.bean.ConversionJob" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.TimeZone" %>
 <%
     User user = (User) session.getAttribute("user");
     if (user == null) {
@@ -12,6 +13,7 @@
 
     List<ConversionJob> jobs = (List<ConversionJob>) request.getAttribute("jobs");
     SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm");
+    dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,7 +23,7 @@
     <title>My Jobs - Video Converter</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-    <meta http-equiv="refresh" content="15">
+    <meta http-equiv="refresh" content="5">
 </head>
 <body>
     <nav class="navbar navbar-dark bg-primary">
@@ -38,12 +40,6 @@
     <div class="container mt-4">
         <h3 class="mb-4">My Conversion Jobs</h3>
 
-        <% if (request.getParameter("success") != null) { %>
-            <div class="alert alert-success alert-dismissible fade show">
-                Video uploaded successfully! Conversion started.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <% } %>
 
         <% if (jobs == null || jobs.isEmpty()) { %>
             <div class="alert alert-info">
@@ -98,7 +94,7 @@
                     </tbody>
                 </table>
             </div>
-            <small class="text-muted">Page auto-refreshes every 10 seconds</small>
+            <small class="text-muted">Page auto-refreshes every 5 seconds</small>
         <% } %>
     </div>
 
