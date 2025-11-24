@@ -17,9 +17,9 @@ import java.io.IOException;
 
 @WebServlet("/upload")
 @MultipartConfig(
-    maxFileSize = 3221225472L,      // 500 MB 5368709120L (5gb)
-    maxRequestSize = 3221225472L,   // 600 MB 10737418240L (10gb)
-    fileSizeThreshold = 16777216  // 100 MB (buffer trong RAM) 52428800 (50mb)
+    maxFileSize = 3221225472L,      // 3gb
+    maxRequestSize = 3221225472L,   //  3gb
+    fileSizeThreshold = 16777216  // 16mb buffer trong RAM
 )
 public class UploadServlet extends HttpServlet {
     private ConversionBO conversionBO;
